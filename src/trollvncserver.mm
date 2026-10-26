@@ -2041,8 +2041,9 @@ NS_INLINE CGPoint vncPointToDevicePoint(int vx, int vy) {
     int rotQ = (gOrientationSyncEnabled ? gRotationQuad.load(std::memory_order_relaxed) : 0) & 3;
 
 #if !TARGET_IPHONE_SIMULATOR
-    // Apply user-configured rotation offset (0..3 quadrants CW)
-    int effRotQ = (rotQ + gOrientationFixQuad) & 3;
+    // Undo the user-configured rotation offset (0..3 quadrants CW): rotQ already includes it
+    // via rotationForOrientation(), and input must use the inverse (v3.1-2 used +270° for +90°).
+    int effRotQ = (rotQ + 4 - gOrientationFixQuad) & 3;
 #else
     int effRotQ = rotQ;
 #endif
