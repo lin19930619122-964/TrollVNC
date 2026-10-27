@@ -2331,6 +2331,10 @@ static void ptrAddEvent(int buttonMask, int x, int y, rfbClientPtr cl) {
         if (gWheelNaturalDir)
             delta = -delta;
         int rotQ = (gOrientationSyncEnabled ? gRotationQuad.load(std::memory_order_relaxed) : 0) & 3;
+#if !TARGET_IPHONE_SIMULATOR
+        // Scroll in the same device space as vncPointToDevicePoint() (orientation offset undone)
+        rotQ = (rotQ + 4 - gOrientationFixQuad) & 3;
+#endif
         // Ensure client remains valid while we touch its state asynchronously
         rfbIncrClientRef(cl);
         dispatch_async(gWheelQueue, ^{
